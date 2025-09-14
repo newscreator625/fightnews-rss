@@ -1,0 +1,24 @@
+name: Generate FightNews RSS
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # запуск каждые 10 минут
+  workflow_dispatch: {}      # можно запускать вручную
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - run: pip install requests beautifulsoup4 lxml
+      - run: python rss_generator.py
+      - name: Commit RSS
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/fightnews.xml
+          git commit -m "update rss" || echo "no changes"
+          git push
